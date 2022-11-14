@@ -1,7 +1,9 @@
+"""The main program of my Python Package Template."""
 import sys
 
 
 def main():
+    """A very useful main function for my program."""
     pass
 
 
