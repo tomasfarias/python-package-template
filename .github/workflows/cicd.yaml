@@ -1,0 +1,99 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ master ]
+    tags: '*'
+  pull_request:
+
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9, '3.10', '3.11']
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            files.pythonhosted.org:443
+            github.com:443
+            objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            pypi.org:443
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+      - uses: abatilo/actions-poetry@v2.1.0
+
+      - name: Install with Poetry
+        run: poetry install
+
+      - name: Style guide enforcement with flake8
+        run: poetry run flake8 .
+
+      - name: Static type checking with mypy
+        run: poetry run mypy .
+
+      - name: Code formatting with black
+        run: poetry run black --check .
+
+      - name: Set COVERAGE_FILE in environment
+        run: echo "COVERAGE_FILE=.coverage.${{ matrix.python-version }}.${{ matrix.airflow-version }}" >> $GITHUB_ENV
+
+      - name: Run tests with pytest and compute coverage
+        run: poetry run coverage run -m pytest -v tests/
+
+      - name: Upload code coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-data
+          path: ".coverage.*"
+          if-no-files-found: ignore
+
+  publish:
+    needs: test
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            files.pythonhosted.org:443
+            github.com:443
+            objects.githubusercontent.com:443
+            raw.githubusercontent.com:443
+            pypi.org:443
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+      - uses: abatilo/actions-poetry@v2.1.0
+
+      - name: Install with Poetry
+        run: poetry install
+
+      - name: Build with Poetry
+        run: poetry install
+
+      - name: Publish with Poetry to PyPI
+        run: poetry publish --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
