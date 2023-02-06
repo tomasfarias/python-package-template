@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.9"
 
 [tool.poetry.dev-dependencies]
-black = "^22.10"
+black = "^23.1"
 coverage = { extras = ["toml"], version = "^6.5" }
 flake8 = "^5.0.4"
 flake8-docstrings = "^1.6.0"
