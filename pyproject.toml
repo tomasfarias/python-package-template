@@ -15,6 +15,7 @@ coverage = { extras = ["toml"], version = ">=7" }
 mypy = ">=1"
 pre-commit = ">=3"
 pytest = ">=7"
+ruff = ">=0.0.254"
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]
