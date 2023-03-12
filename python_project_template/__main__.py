@@ -3,7 +3,7 @@ import sys
 
 
 def main():
-    """A very useful main function for my program."""
+    """Execute my program."""
     pass
 
 
