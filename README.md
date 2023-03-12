@@ -63,9 +63,9 @@ I cannot ignore the benefits of static typing, even in its imperfect form when a
 
 [`mypy`](http://mypy-lang.org/) is simply the standard when it comes to static type checking.
 
-## Enforce PEP8 guidelines with flake8
+## Linting with ruff
 
-Style discussions are a waste of time, you should be focusing on your project, not on how it looks. For this reason, it's better to forget about it and let [`flake8`](https://flake8.pycqa.org/en/latest/) enforce the widely accepted PEP8 style guide. This reduces barriers to entry, as most people in the Python ecosystem are already used to the general guidelines given by PEP8, and most IDEs are also configured to enforce PEP8.
+[`ruff`](https://github.com/charliermarsh/ruff) combines the functionality of [`flake8`](https://pypi.org/project/flake8/) (+ plugins), [`isort`](https://pypi.org/project/isort/), and other linters in a single tool with incredible performance.
 
 ## Check every commit with pre-commit
 
@@ -73,4 +73,4 @@ All these dependencies are great, but they still need to be manually run. That's
 
 # License
 
-MIT
+See ![LICENSE](LICENSE).

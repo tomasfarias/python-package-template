@@ -37,13 +37,13 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.6
         with:
-          poetry-version: 1.2.2
+          poetry-version: 1.3.2
 
       - name: Install with Poetry
         run: poetry install
 
-      - name: Style guide enforcement with flake8
-        run: poetry run flake8 .
+      - name: Linting with ruff
+        run: poetry run ruff .
 
       - name: Static type checking with mypy
         run: poetry run mypy .
@@ -52,7 +52,7 @@ jobs:
         run: poetry run black --check .
 
       - name: Set COVERAGE_FILE in environment
-        run: echo "COVERAGE_FILE=.coverage.${{ matrix.python-version }}.${{ matrix.airflow-version }}" >> $GITHUB_ENV
+        run: echo "COVERAGE_FILE=.coverage.${{ matrix.python-version }}" >> $GITHUB_ENV
 
       - name: Run tests with pytest and compute coverage
         run: poetry run coverage run -m pytest -v tests/
@@ -63,6 +63,61 @@ jobs:
           name: coverage-data
           path: ".coverage.*"
           if-no-files-found: ignore
+
+  coverage:
+    name: Combine and check coverage
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            files.pythonhosted.org:443
+            github.com:443
+            api.github.com:443
+            pypi.org:443
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2.1.4
+        with:
+          poetry-version: 1.3.2
+
+      - name: Install airflow-dbt-python with Poetry
+        run: poetry install
+
+      - name: Download coverage data.
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-data
+
+      - name: Combine coverage & fail if it's <95%.
+        run: |
+          poetry run coverage combine
+          poetry run coverage html --skip-covered --skip-empty
+          poetry run coverage json
+          # Save in env variable for badge
+          export TOTAL=$(python -c "import json;print(json.load(open('coverage.json'))['totals']['percent_covered_display'])")
+          echo "total=$TOTAL" >> $GITHUB_ENV
+          # Report and write to summary.
+          poetry run coverage report | sed 's/^/    /' >> $GITHUB_STEP_SUMMARY
+          # Report again and fail if under 100%.
+          poetry run coverage report --fail-under=95
+
+      - name: Upload HTML report if check failed.
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: html-report
+          path: htmlcov
 
   publish:
     needs: test
@@ -86,7 +141,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: '3.11'
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.6

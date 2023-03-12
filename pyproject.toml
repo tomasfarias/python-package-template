@@ -7,17 +7,14 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.11"
 
 [tool.poetry.dev-dependencies]
-black = "^22.10"
-coverage = { extras = ["toml"], version = "^6.5" }
-flake8 = "^5.0.4"
-flake8-docstrings = "^1.6.0"
-isort = "^5.10.1"
-mypy = ">=0.990"
-pre-commit = "^2.20.0"
-pytest = "^7.1.2"
+black = ">=23"
+coverage = { extras = ["toml"], version = ">=7" }
+mypy = ">=1"
+pre-commit = ">=3"
+pytest = ">=7"
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]
@@ -41,13 +38,37 @@ exclude = '''
 )/
 '''
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-
 [tool.mypy]
 ignore_missing_imports = true
 strict_optional = true
 warn_unused_ignores = false
 warn_redundant_casts = true
 warn_unused_configs = true
+
+[tool.ruff]
+select = ["E", "D", "F", "I"]
+ignore = []
+line-length = 88
+target-version = "py311"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
